@@ -1,4 +1,4 @@
-import { bfs, bfs0 } from '@tsplus-search/core/bfs'
+import { bfs } from '@tsplus-search/core/bfs'
 import { constant } from '@tsplus/stdlib/data/Function'
 
 describe('bfs', () => {
@@ -53,6 +53,50 @@ describe('bfs', () => {
     expect(result).to.deep.equal(Maybe.some([0, 1, 2, 3, 4, 5]))
     expect(finder).toHaveBeenCalled()
   }, 1e3)
+
+  describe('bfs.legacy', () => {
+    const next = (a: number) => [a - 1]
+    it('when found is true returns initial element', () => {
+      const result = bfs(next, constant(true), 5)
+      expect(result).to.deep.equal(Maybe([5]))
+    })
+
+    it('an empty find returns Maybe.none', () => {
+      expect(bfs(
+        constant([]),
+        constant(false),
+        0
+      )).to.deep.equal(Maybe.none)
+    })
+
+    it.only('found when true <= 3 has path of two', () => {
+      const result = bfs(next, (a: number) => a <= 3, 5)
+      expect(result).to.deep.equal(Maybe([5, 4, 3]))
+    })
+
+    it('a next of empty is none', () => {
+      const result = bfs(() => [], constant(false), 5)
+      expect(result).to.deep.equal(Maybe.none)
+    })
+
+    it('skips visited nodes', () => {
+      expect(
+        bfs(constant([5]), constant(false), 7)
+      ).to.deep.equal(Maybe.none)
+    })
+
+    it('goes breadth first', () => {
+      const next = (a: number) => a == 2 ? [4, 3] : a == 3 || a == 4 ? [5] : []
+      const nextSpy = vi.fn(next)
+      const result = bfs(nextSpy, (a) => a >= 5, 2)
+      console.log('result is ', result)
+      expect(nextSpy).toHaveBeenCalledWith(4)
+      expect(nextSpy).toHaveBeenCalledWith(2)
+      expect(nextSpy).toHaveBeenCalledWith(3)
+      expect(nextSpy).toHaveBeenCalledTimes(3)
+      expect(result).to.deep.equal(Maybe.some([2, 3, 5]))
+    })
+  })
 })
 
 describe('visit', () => {
@@ -61,46 +105,3 @@ describe('visit', () => {
   it.todo('visits all nodes')
 })
 
-describe('bfs0', () => {
-  const next = (a: number) => [a - 1]
-  it('when found is true returns initial element', () => {
-    const result = bfs0(next, constant(true), 5)
-    expect(result).to.deep.equal(Maybe([5]))
-  })
-
-  it('an empty find returns Maybe.none', () => {
-    expect(bfs0(
-      constant([]),
-      constant(false),
-      0
-    )).to.deep.equal(Maybe.none)
-  })
-
-  it.only('found when true <= 3 has path of two', () => {
-    const result = bfs0(next, (a: number) => a <= 3, 5)
-    expect(result).to.deep.equal(Maybe([5, 4, 3]))
-  })
-
-  it('a next of empty is none', () => {
-    const result = bfs(() => [], constant(false), 5)
-    expect(result).to.deep.equal(Maybe.none)
-  })
-
-  it('skips visited nodes', () => {
-    expect(
-      bfs(constant([5]), constant(false), 7)
-    ).to.deep.equal(Maybe.none)
-  })
-
-  it('goes breadth first', () => {
-    const next = (a: number) => a == 2 ? [4, 3] : a == 3 || a == 4 ? [5] : []
-    const nextSpy = vi.fn(next)
-    const result = bfs(nextSpy, (a) => a >= 5, 2)
-    console.log('result is ', result)
-    expect(nextSpy).toHaveBeenCalledWith(4)
-    expect(nextSpy).toHaveBeenCalledWith(2)
-    expect(nextSpy).toHaveBeenCalledWith(3)
-    expect(nextSpy).toHaveBeenCalledTimes(3)
-    expect(result).to.deep.equal(Maybe.some([2, 3, 5]))
-  })
-})
