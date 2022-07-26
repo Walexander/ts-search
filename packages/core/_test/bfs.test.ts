@@ -85,17 +85,40 @@ describe('bfs', () => {
       ).to.deep.equal(Maybe.none)
     })
 
+    it('finds the first straight path', () => {
+      expect(bfs(
+        (_: number) => [_ - 1, _ - 2],
+        (a) => a <= 1,
+        5
+      )).to.deep.equal(Maybe.some([5, 4, 3, 2, 1]))
+    })
+
     it('goes breadth first', () => {
       const next = (a: number) => a == 2 ? [4, 3] : a == 3 || a == 4 ? [5] : []
       const nextSpy = vi.fn(next)
       const result = bfs(nextSpy, (a) => a >= 5, 2)
       console.log('result is ', result)
-      expect(nextSpy).toHaveBeenCalledWith(4)
-      expect(nextSpy).toHaveBeenCalledWith(2)
-      expect(nextSpy).toHaveBeenCalledWith(3)
-      expect(nextSpy).toHaveBeenCalledTimes(3)
+      expect(nextSpy).toHaveBeenNthCalledWith(1, 2)
+      expect(nextSpy).toHaveBeenNthCalledWith(2, 4)
+      expect(nextSpy).toHaveBeenNthCalledWith(3, 3)
+      expect(nextSpy).toHaveBeenNthCalledWith(4, 5)
       expect(result).to.deep.equal(Maybe.some([2, 3, 5]))
     })
+  })
+
+  describe('adjacency lists', () => {
+    const adjacencyList = {
+      'foo': ['bar'],
+      'bar': ['foobar', 'baz', 'bas'],
+      'baz': ['foobar'],
+      'bas': ['foobar'],
+      'foobar': []
+    }
+    const adjacency = (a: string) => adjacencyList[a] || []
+    it('finds first path', () =>
+      expect(bfs(adjacency, (a: string) => a == 'foobar', 'foo')).to.deep.equal(
+        Maybe.some(['foo', 'foobar'])
+      ))
   })
 })
 
@@ -104,4 +127,3 @@ describe('visit', () => {
   void _
   it.todo('visits all nodes')
 })
-

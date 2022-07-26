@@ -28,7 +28,7 @@ export function generalizedSearch<A>(next: (a: A) => A[], found: Predicate<A>) {
     )
     .flatMap(() => Z.modify((s: SearchState<A>) => [s.queue, s]))
     // if we havent failed, repeat until the queue is empty
-    .repeatUntil((s) => s.size() <= 0)
+    .repeatUntil((s) => s.isEmpty())
     // success will be in the failure channel, so a "success" here
     // means we failed to find a satisfactory node -- hence
     // we map to Mabye.none
