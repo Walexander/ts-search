@@ -1,2 +1,2 @@
-export { bfs } from '@tsplus-search/core/bfs'
-export { dfs } from '@tsplus-search/core/dfs'
+export { bfs } from '@ts-search/core/bfs'
+export { dfs } from '@ts-search/core/dfs'

@@ -1,6 +1,6 @@
-import { generalizedSearch } from '@tsplus-search/core/internal/generalized-search'
-import { SearchStack } from '@tsplus-search/core/internal/search-container'
-import type { SearchState } from '@tsplus-search/core/internal/search-state'
+import { generalizedSearch } from '@ts-search/core/internal/generalized-search'
+import { SearchStack } from '@ts-search/core/internal/search-container'
+import type { SearchState } from '@ts-search/core/internal/search-state'
 
 /**
  * `dfs` uses a stack to find the first node that satisfies the given predicate returning a Maybe for the path to the solution node or Maybe.none if none exists. The `next` function should return values in the order they should be added to the stack - i.e. in reverse order of traversal

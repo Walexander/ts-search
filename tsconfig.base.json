@@ -39,16 +39,16 @@
         "incremental": true,
         "removeComments": false,
         "paths": {
-            "@tsplus-search/core": [
+            "@ts-search/core": [
                 "./packages/core/_src/index.ts"
             ],
-            "@tsplus-search/core/test/*": [
+            "@ts-search/core/test/*": [
                 "./packages/core/_test/*"
             ],
-            "@tsplus-search/core/examples/*": [
+            "@ts-search/core/examples/*": [
                 "./packages/core/_examples/*"
             ],
-            "@tsplus-search/core/*": [
+            "@ts-search/core/*": [
                 "./packages/core/_src/*"
             ]
         }

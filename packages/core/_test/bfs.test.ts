@@ -1,4 +1,4 @@
-import { bfs } from '@tsplus-search/core/bfs'
+import { bfs } from '@ts-search/core/bfs'
 import { constant } from '@tsplus/stdlib/data/Function'
 
 describe('bfs', () => {

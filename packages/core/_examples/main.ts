@@ -1,4 +1,4 @@
-import { bfs, dfs } from '@tsplus-search/core'
+import { bfs, dfs } from '@ts-search/core'
 
 const countChange_bfs = (target: number) => bfs(addOne(target), (a) => a == target, 0)
 const countChange_dfs = (target: number) => dfs(addOne(target), (a) => a == target, 0)

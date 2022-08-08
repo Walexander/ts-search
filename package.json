@@ -1,9 +1,9 @@
 {
-  "org": "@tsplus-search",
+  "org": "@ts-search",
   "private": true,
   "type": "module",
-  "repository": "https://github.com/Walexander/tsplus-search.git",
-  "author": "Michael Arnaldi <arnaldimichael@gmail.com>",
+  "repository": "https://github.com/Walexander/ts-search.git",
+  "author": "Will Alexander <serverherder+npm@gmail.com>",
   "license": "MIT",
   "workspaces": [
     "packages/*"
@@ -36,6 +36,7 @@
     "@effect-ts/core": "^0.60.2",
     "@repo-tooling/eslint-plugin-dprint": "^0.0.4",
     "@tsplus/installer": "^0.0.124",
+    "@tsplus/stdlib": "^0.2.3",
     "@types/node": "^18.0.0",
     "@types/rimraf": "^3.0.2",
     "@typescript-eslint/eslint-plugin": "^5.30.3",

@@ -1,7 +1,7 @@
 import { Z } from '@fncts/base/control/Z'
-import type { SearchContainer } from '@tsplus-search/core/internal/search-container'
-import { ZAny, ZAssociativeBoth, ZCovariant } from '@tsplus-search/core/internal/search-state'
-import type { SearchState } from '@tsplus-search/core/internal/search-state'
+import type { SearchContainer } from '@ts-search/core/internal/search-container'
+import { ZAny, ZAssociativeBoth, ZCovariant } from '@ts-search/core/internal/search-state'
+import type { SearchState } from '@ts-search/core/internal/search-state'
 import { constant } from '@tsplus/stdlib/data/Function'
 
 const forEachZ = <A>() =>

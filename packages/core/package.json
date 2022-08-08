@@ -1,9 +1,9 @@
 {
-  "name": "@tsplus-search/core",
+  "name": "@ts-search/core",
   "version": "0.0.0",
   "type": "module",
-  "repository": "https://github.com/ts-plus/installer.git",
-  "author": "Michael Arnaldi <arnaldimichael@gmail.com>",
+  "repository": "https://github.com/Walexander/ts-search.git",
+  "author": "Will Alexander <serverherder+npm@gmail.com>",
   "license": "MIT",
   "publishConfig": {
     "access": "public",

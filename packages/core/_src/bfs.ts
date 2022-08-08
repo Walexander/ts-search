@@ -1,6 +1,6 @@
-import { generalizedSearch } from '@tsplus-search/core/internal/generalized-search'
-import { SearchQueue } from '@tsplus-search/core/internal/search-container'
-import type { SearchState } from '@tsplus-search/core/internal/search-state'
+import { generalizedSearch } from '@ts-search/core/internal/generalized-search'
+import { SearchQueue } from '@ts-search/core/internal/search-container'
+import type { SearchState } from '@ts-search/core/internal/search-state'
 
 export { SearchQueue }
 

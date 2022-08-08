@@ -1,4 +1,4 @@
-import { SearchQueue } from '@tsplus-search/core/bfs'
+import { SearchQueue } from '@ts-search/core/bfs'
 
 describe('SearchContainer', () => {
   it('queues', () => {

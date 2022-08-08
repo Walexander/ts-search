@@ -1,4 +1,4 @@
-import { dfs } from '@tsplus-search/core'
+import { dfs } from '@ts-search/core'
 import { constant } from '@tsplus/stdlib/data/Function'
 
 describe('dfs', () => {
