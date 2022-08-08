@@ -1,23 +1,42 @@
-import { generalizedSearch } from './internal/generalized-search'
-import { SearchQueue } from './internal/search-container'
-import type { SearchState } from './internal/search-state'
+import { generalizedSearch } from '@tsplus-search/core/internal/generalized-search'
+import { SearchQueue } from '@tsplus-search/core/internal/search-container'
+import type { SearchState } from '@tsplus-search/core/internal/search-state'
 
-export { SearchQueue } from './internal/search-container'
+export { SearchQueue }
 
-export function bfs<A>(
-  next: (a: A) => A[],
-  found: Predicate<A>,
-  initial: A
-) {
-  // breadth-first "queue"
+/**
+ * The next(a) callback returns the edges of `a`
+ * @callback nextNeighbors
+ * @param {A}
+ * @returns {A[]}
+ */
+
+/**
+ * `bfs` uses a queue to find the first node that satisfies the given predicate returning a Maybe for the path to the solution node or Maybe.none if none exists
+ *
+ * @param next {nextNeighbors} - Generate the neighbors
+ * @param found {Predicate<A>} - A predicate to determine if the node is found
+ * @param initial - The initial node from which to start
+ *
+ * @example
+ * function countChange(target: number) {
+ *   return bfs(addCoin, (a) => a == target, 0)
+ *   function addCoin(amt: number) {
+ *     const Coins = [25, 10, 5, 1]
+ *     return Coins.map(_ => _ + amt).filter(_ => _ <= target)
+ *   }
+ * }
+ * countChange(12) // Maybe.some([10, 11, 12])
+ * countChange(-1) // Maybe.none
+ */
+export function bfs<A>(next: (a: A) => A[], found: Predicate<A>, initial: A) {
   const queue = MutableQueue.unbounded<A>()
   queue.offer(initial)
-  return generalizedSearch(next, found).unsafeRunStateResult(
-    <SearchState<A>> {
-      current: initial,
-      queue: new SearchQueue(queue),
-      visited: HashSet.empty(),
-      paths: HashMap.empty()
-    }
-  )
+  const state0: SearchState<A> = {
+    current: initial,
+    queue: new SearchQueue(queue),
+    visited: HashSet.empty(),
+    paths: HashMap.empty()
+  }
+  return generalizedSearch(next, found).unsafeRunStateResult(state0)
 }

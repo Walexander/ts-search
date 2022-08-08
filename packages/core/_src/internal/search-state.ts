@@ -1,8 +1,8 @@
 import { Z } from '@fncts/base/control/Z'
+import type { SearchContainer } from '@tsplus-search/core/internal/search-container'
 import type { Any } from '@tsplus/stdlib/prelude/Any'
 import type { AssociativeBoth } from '@tsplus/stdlib/prelude/AssociativeBoth'
 import type { Covariant } from '@tsplus/stdlib/prelude/Covariant'
-import type { SearchContainer } from './search-container'
 
 export interface ZFunctor<V, W = string> extends HKT {
   readonly type: Z<

@@ -39,7 +39,7 @@ describe('dfs', () => {
         (_: number) => [_ - 2, _ - 1],
         (a) => a <= 1,
         5
-      )).to.deep.equal(Maybe.some([5, 4, 3, 2, 1])))
+      )).to.deep.equal(Maybe.some([5, 3, 1])))
   })
 
   describe('adjacency lists', () => {
@@ -53,7 +53,7 @@ describe('dfs', () => {
     const adjacency = (a: string) => adjacencyList[a] || []
     it('finds second path', () =>
       expect(dfs(adjacency, (a: string) => a == 'winner', 'foo')).to.deep.equal(
-        Maybe.some(['foo', 'bar', 'bas', 'foobar', 'winner'])
+        Maybe.some(['foo', 'bar', 'foobar', 'winner'])
       ))
   })
 })

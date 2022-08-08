@@ -14,7 +14,7 @@ describe('SearchContainer', () => {
     const q = new SearchQueue(qq)
     q.push(15)
     q.push(5)
-    q.pop()
+    expect(q.pop()).to.deep.equal(Maybe.some(15))
     expect(q.size()).to.equal(1)
   })
 })

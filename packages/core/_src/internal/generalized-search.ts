@@ -1,7 +1,8 @@
 import { Z } from '@fncts/base/control/Z'
+import type { SearchContainer } from '@tsplus-search/core/internal/search-container'
+import { ZAny, ZAssociativeBoth, ZCovariant } from '@tsplus-search/core/internal/search-state'
+import type { SearchState } from '@tsplus-search/core/internal/search-state'
 import { constant } from '@tsplus/stdlib/data/Function'
-import { ZAny, ZAssociativeBoth, ZCovariant } from './search-state'
-import type { SearchState } from './search-state'
 
 const forEachZ = <A>() =>
   Chunk.ForEach.forEachF(HKT.intersect(
@@ -9,78 +10,81 @@ const forEachZ = <A>() =>
     ZAny<A, any>(),
     ZAssociativeBoth<A, any>()
   ))
-
+declare const opt: Maybe<any>
 export function generalizedSearch<A>(next: (a: A) => A[], found: Predicate<A>) {
-  return Z.getsZ(({ queue }: SearchState<A>) =>
-    /* get the next entry from the container */
-    queue.pop().fold(
-      /* this should not happen */
-      () => Z.failNow(void null),
-      /* discover its neighbors, adding them to the queue */
-      discover
-    )
-  )
-    .tap((a) =>
-      /* check the current node */
-      found(a)
-        ? celebrate(a) // return the path to the found node
-        : Z.update(mark(a)) // or mark the node as visited
-    )
-    .flatMap(() => Z.modify((s: SearchState<A>) => [s.queue, s]))
-    // if we havent failed, repeat until the queue is empty
-    .repeatUntil((s) => s.isEmpty())
-    // success will be in the failure channel, so a "success" here
-    // means we failed to find a satisfactory node -- hence
-    // we map to Mabye.none
+  // When we find it, use the error channel to short-circuit the loop
+  return Z.getsZ(dequeue)
+    .tap(visit)
+    .tap(discover)
+    .flatMap(getsQueue)
+    .repeatUntil(q => q.isEmpty())
+    // no failure means we didnt find it
     .map(constant(Maybe.none))
-    // catch "failure" by converting non-null values to a Maybe.some
     .catchAll((e) => pipe(e, Maybe.fromNullable, Z.succeedNow))
 
+  function dequeue({ queue }: SearchState<A>) {
+    return queue.pop().fold(
+      () => Z.failNow(void null),
+      (node) => Z.succeedNow(node)
+    )
+  }
+
+  // check if this is the node we want and, if so, fail with the
+  // path list; otherwise mark the node as visited
+  function visit(a: A) {
+    return found(a) ?
+      Z.getsZ(({ paths }: SearchState<A>) => Z.failNow(makePath(a, paths))) :
+      Z.update(mark)
+
+    // mark this node as having been visited
+    function mark(state: SearchState<A>): SearchState<A> {
+      return {
+        ...state,
+        visited: state.visited.add(a)
+      }
+    }
+
+    // get the path to the node `v` by looking up its parent node recursively
+    function makePath<A>(v: A, paths: HashMap<A, A>) {
+      return iter(v, [v])
+
+      function iter(p: A, ps: A[]): A[] {
+        return paths.get(p).fold(
+          constant(ps),
+          (a) => iter(a, [a, ...ps])
+        )
+      }
+    }
+  }
+
+  // discover a node's neighbors and add the ones
+  // we havent visited to the queue
   function discover(node: A) {
     const forEach = forEachZ<A>()
-    return Z.getsZ((state: SearchState<A>) => onDiscovered(node, state)).map(
-      constant(node)
-    )
+    return Z.gets(walk)
+      .flatMap(forEach(addNeigbor))
 
-    function onDiscovered(node: A, state: SearchState<A>) {
+    function walk(state: SearchState<A>) {
       return pipe(
         next(node),
         Chunk.from,
-        Chunk.$.filter((a) => !state.visited.has(a)),
-        forEach((a) => (
-          Z.update((s) => ({
-            ...s,
-            paths: s.paths.modify(a, () => Maybe(node)),
-            queue: s.queue.push(a)
-          }))
-        ))
+        Chunk.$.filter((a) => !state.visited.has(a))
+      )
+    }
+
+    function addNeigbor(neighbor: A) {
+      return Z.update(
+        ({ paths, queue, ...state }: SearchState<A>) => ({
+          ...state,
+          // dont update parent paths, only insert
+          paths: paths.modify(neighbor, Maybe.$.orElse(Maybe(node))),
+          queue: queue.push(neighbor)
+        })
       )
     }
   }
 
-  function celebrate(a: A) {
-    return Z.getsZ(({ paths }: SearchState<A>) => {
-      const points = makeParents(a, paths)
-      return Z.failNow(points)
-    })
-  }
-
-  function mark(a: A): (state: SearchState<A>) => SearchState<A> {
-    return (state) => (
-      <SearchState<A>> {
-        ...state,
-        visited: state.visited.add(a)
-      }
-    )
-  }
-}
-
-function makeParents<A>(v: A, parent: HashMap<A, A>) {
-  return iter(v, [v])
-  function iter(p: A, ps: A[]): A[] {
-    return parent.get(p).fold(
-      () => ps,
-      (a) => iter(a, [a, ...ps])
-    )
+  function getsQueue() {
+    return Z.gets<SearchState<A>, SearchContainer<A>>(({ queue }) => queue)
   }
 }
