@@ -4,38 +4,38 @@ import type { Any } from '@tsplus/stdlib/prelude/Any'
 import type { AssociativeBoth } from '@tsplus/stdlib/prelude/AssociativeBoth'
 import type { Covariant } from '@tsplus/stdlib/prelude/Covariant'
 
-export interface ZFunctor<V, W = string> extends HKT {
+export interface ZFunctor<V, K, W = string> extends HKT {
   readonly type: Z<
     W,
-    SearchState<V>,
-    SearchState<V>,
+    SearchState<V, K>,
+    SearchState<V, K>,
     this['R'],
     this['E'],
     this['A']
   >
 }
-export type ZSearch<R, E, A> = Z<string, SearchState<A>, SearchState<A>, R, E, A>
+export type ZSearch<R, E, A, K> = Z<string, SearchState<A, K>, SearchState<A, K>, R, E, A>
 
-export interface SearchState<A> {
+export interface SearchState<A, K> {
   current: A
   queue: SearchContainer<A>
-  visited: HashSet<A>
-  paths: HashMap<A, A>
+  visited: HashSet<K>
+  paths: HashMap<K, A>
 }
 
-export function ZCovariant<V, W>() {
-  return HKT.instance<Covariant<ZFunctor<V, W>>>({
+export function ZCovariant<V, K, W>() {
+  return HKT.instance<Covariant<ZFunctor<V, K, W>>>({
     map: (f) => (fa) => fa.map(f)
   })
 }
 
-export function ZAssociativeBoth<V, W>() {
-  return HKT.instance<AssociativeBoth<ZFunctor<V, W>>>({
+export function ZAssociativeBoth<V, K, W>() {
+  return HKT.instance<AssociativeBoth<ZFunctor<V, K, W>>>({
     both: (fb) => (fa) => fa.zip(fb).map((t) => Tuple(...t))
   })
 }
-export function ZAny<V, W>() {
-  return HKT.instance<Any<ZFunctor<V, W>>>({
+export function ZAny<V, K, W>() {
+  return HKT.instance<Any<ZFunctor<V, K, W>>>({
     any: () => Z.succeedNow({})
   })
 }

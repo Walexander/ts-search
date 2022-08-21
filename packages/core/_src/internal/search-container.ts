@@ -1,10 +1,12 @@
 import { isNonNullable } from '@fncts/base/util/predicates'
+import { Maybe } from '@tsplus/stdlib/data/Maybe'
 
 export interface SearchContainer<A> {
   push: (a: A) => SearchContainer<A>
   pop: () => Maybe<A>
   isEmpty: () => boolean
 }
+
 export class SearchStack<A> implements SearchContainer<A> {
   stack: Stack<A> | undefined
   constructor(stack: Stack<A>) {
@@ -16,7 +18,7 @@ export class SearchStack<A> implements SearchContainer<A> {
     return this
   }
 
-  pop() {
+  pop(): Maybe<A> {
     const value = this.stack?.value
     this.stack = this.stack?.previous
     return Maybe.fromNullable(value)

@@ -32,11 +32,11 @@ export { SearchQueue }
 export function bfs<A>(next: (a: A) => A[], found: Predicate<A>, initial: A) {
   const queue = MutableQueue.unbounded<A>()
   queue.offer(initial)
-  const state0: SearchState<A> = {
+  const state0: SearchState<A, A> = {
     current: initial,
     queue: new SearchQueue(queue),
     visited: HashSet.empty(),
     paths: HashMap.empty()
   }
-  return generalizedSearch(next, found).unsafeRunStateResult(state0)
+  return generalizedSearch(next, found, identity).unsafeRunStateResult(state0)
 }

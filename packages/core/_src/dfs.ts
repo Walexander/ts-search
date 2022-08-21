@@ -25,11 +25,11 @@ export function dfs<A>(
   found: Predicate<A>,
   initial: A
 ): Maybe<A[]> {
-  const state0: SearchState<A> = {
+  const state0: SearchState<A, A> = {
     current: initial,
     queue: new SearchStack<A>(new Stack(initial)),
     visited: HashSet.empty(),
     paths: HashMap.empty()
   }
-  return generalizedSearch(next, found).unsafeRunStateResult(state0)
+  return generalizedSearch(next, found, identity).unsafeRunStateResult(state0)
 }
