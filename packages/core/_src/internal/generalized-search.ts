@@ -19,6 +19,7 @@ export function generalizedSearch<A, K>(
   ord?: Ord<A>
 ) {
   // When we find it, use the error channel to short-circuit the loop
+  const _ord = isNull(ord) || isUndefined(ord) ? Ord(constant(0)) : ord
   return (
     Z.getsZ(dequeue)
       .tap(visit)
@@ -41,7 +42,7 @@ export function generalizedSearch<A, K>(
   // path list; otherwise mark the node as visited
   function visit(a: A) {
     return found(a)
-      ? buildPath(a)
+      ? buildPath(a).flatMap(Z.failNow)
       : Z.update(mark)
 
     // mark this node as having been visited
@@ -49,22 +50,6 @@ export function generalizedSearch<A, K>(
       return {
         ...state,
         visited: state.visited.add(makeKey(a))
-      }
-    }
-  }
-
-  function buildPath(v: A) {
-    return Z.getsZ(({ paths }: SearchState<A, K>) => Z.failNow(makePath(v, paths)))
-
-    function makePath(v: A, paths: HashMap<K, A>) {
-      return iter(v, [v])
-
-      function iter(p: A, ps: A[]): A[] {
-        return pipe(
-          paths,
-          HashMap.$.get(makeKey(p)),
-          Maybe.$.fold(constant(ps), (a) => iter(a, [a, ...ps]))
-        )
       }
     }
   }
@@ -97,13 +82,29 @@ export function generalizedSearch<A, K>(
       }))
     }
   }
+
   /* returns true when `b` is better than `a` */
   function better(a: A, b: A): boolean {
-    const _ord = isNull(ord) || isUndefined(ord) ? Ord(constant(0)) : ord
     return _ord.compare(a, b) < 0
   }
 
   function getsQueue() {
     return Z.gets<SearchState<A, K>, SearchContainer<A>>(({ queue }) => queue)
+  }
+
+  function buildPath(v: A) {
+    return Z.gets(({ paths }: SearchState<A, K>) => makePath(v, paths))
+
+    function makePath(v: A, paths: HashMap<K, A>) {
+      return iter(v, [v])
+
+      function iter(p: A, ps: A[]): A[] {
+        return pipe(
+          paths,
+          HashMap.$.get(makeKey(p)),
+          Maybe.$.fold(constant(ps), (a) => iter(a, [a, ...ps]))
+        )
+      }
+    }
   }
 }
