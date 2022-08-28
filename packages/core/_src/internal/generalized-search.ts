@@ -11,7 +11,6 @@ const forEachZ = <A, K>() =>
     ZAny<A, K, any>(),
     ZAssociativeBoth<A, K, any>()
   ))
-
 export function generalizedSearch<A, K>(
   next: (a: A) => A[],
   found: Predicate<A>,
@@ -20,30 +19,50 @@ export function generalizedSearch<A, K>(
 ) {
   // When we find it, use the error channel to short-circuit the loop
   const _ord = isNull(ord) || isUndefined(ord) ? Ord(constant(0)) : ord
-  return (
-    Z.getsZ(dequeue)
-      .tap(visit)
-      .tap(discover)
-      .flatMap(getsQueue)
-      .repeatUntil((q) => q.isEmpty())
-      // no failure means we didnt find it
-      .map(constant(Maybe.none))
-      .catchAll((e) => pipe(e, Maybe.fromNullable, Z.succeedNow))
-  )
+  const eff = Z.getsZ(dequeue)
+    .flatMap((a) =>
+      Z.unit
+        .write(`visiting ${a}`)
+        .zipSecond(
+          visit(a)
+            .tap(Maybe.$.fold(
+              () => discover(a),
+              () => Z.unit.write(`found ${a}`)
+            ))
+        )
+        .write(`visited ${a}`)
+    )
+    .zip(getsQueue())
+    .repeatUntil(([found, q]) => q.isEmpty() || found.isSome())
+    .flatMap(([a]) =>
+      a.fold(
+        () => Z.succeedNow(Maybe.none),
+        (node) => buildPath(node).map(Maybe.some)
+      )
+    )
+    .catchAll(() => Z.succeedNow(Maybe.none))
+
+  return eff
 
   function dequeue({ queue }: SearchState<A, K>) {
     return queue.pop().fold(
       () => Z.failNow(void null),
-      (node) => Z.succeedNow(node)
+      (node) => Z.update(setCurrent(node)).map(constant(node))
     )
+    function setCurrent(current: A): (state: SearchState<A, K>) => SearchState<A, K> {
+      return (state) => ({
+        ...state,
+        current
+      })
+    }
   }
 
   // check if this is the node we want and, if so, fail with the
   // path list; otherwise mark the node as visited
   function visit(a: A) {
     return found(a)
-      ? buildPath(a).flatMap(Z.failNow)
-      : Z.update(mark)
+      ? Z.succeedNow(Maybe.some(a))
+      : Z.update(mark).map(constant(Maybe.none))
 
     // mark this node as having been visited
     function mark(state: SearchState<A, K>): SearchState<A, K> {
@@ -58,7 +77,11 @@ export function generalizedSearch<A, K>(
   // we havent visited to the queue
   function discover(node: A) {
     const forEach = forEachZ<A, K>()
-    return Z.gets(walk).flatMap(forEach(addNeigbor))
+    return Z.unit
+      .write(`neighbors of ${node}`)
+      .flatMap(() => Z.gets(walk))
+      .flatMap(forEach(addNeigbor))
+
     function walk(state: SearchState<A, K>) {
       return pipe(
         next(node),
@@ -70,22 +93,23 @@ export function generalizedSearch<A, K>(
     function addNeigbor(neighbor: A) {
       return Z.update(({ paths, queue, ...state }: SearchState<A, K>) => ({
         ...state,
-        // dont update parent paths, only insert
         paths: paths.modify(
           makeKey(neighbor),
           Maybe.$.fold(
             () => Maybe(node),
-            (curr) => better(curr, node) ? Maybe(node) : Maybe(curr)
+            // update parent paths when `node` "better" `current`
+            (curr) => better(node, curr) ? Maybe(node) : Maybe(curr)
           )
         ),
         queue: queue.push(neighbor)
       }))
+        .write(`discovered ${node} => ${neighbor}`)
     }
   }
 
   /* returns true when `b` is better than `a` */
   function better(a: A, b: A): boolean {
-    return _ord.compare(a, b) < 0
+    return _ord.compare(b, a) < 0
   }
 
   function getsQueue() {

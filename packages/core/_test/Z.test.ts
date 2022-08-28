@@ -1,4 +1,5 @@
 import * as Z from '@fncts/base/control/Z'
+// import { Either } from '@fncts/base/data/Either'
 import { constant } from '@tsplus/stdlib/data/Function'
 import type * as Any from '@tsplus/stdlib/prelude/Any'
 import type * as AB from '@tsplus/stdlib/prelude/AssociativeBoth'
@@ -131,4 +132,26 @@ describe('Z', () => {
     const output = z.unsafeRunResult
     expect(output).to.equal('you suck')
   })
+
+  it('catchAll', () => {
+    const z = Z.unit
+      .mapState((a: number) => a + 1)
+      .flatMap(() => Z.getsZ(a => Z.succeedNow(a.toFixed(1)).write(`value is ${a}`)))
+      .tap((value) => Z.succeed(() => console.log(`value is ${value}`)))
+      .flatMap((string) => Z.succeedNow(string))
+      .repeatUntil((a) => parseInt(a, 10) >= 10)
+
+    const [log, cause] = z.unsafeRunAll(5)
+    console.log('log is ', log.toArray)
+    expect(cause.isSuccess()).to.be.true
+    expect(z.unsafeRunStateResult(5)).to.deep.equal('10.0')
+  })
+
+  //   it('flip', () => {
+  //     const z = (input: number) =>
+  //       Z.getsZ((max: number) =>
+  //         input > max ? Z.failNow(`error: ${input} > ${max}`) : Z.succeedNow(input + 1)
+  //       ).flip.either
+  //     expect(z(4).unsafeRunStateResult(6)).to.deep.equal(Either.right)
+  //   })
 })

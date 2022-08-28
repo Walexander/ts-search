@@ -4,7 +4,16 @@ import type { SearchState } from '@ts-search/core/internal/search-state'
 import { Ord } from '@tsplus/stdlib/prelude/Ord'
 
 type CostState<A> = Tuple<[number, A]>
-
+/**
+ * `djikstra` uses a `next` that returns an array of (weight, Edge)[]
+ * pairs.  Nodes are dequeued based on their relative priority and, as such,
+ * returns a tuple of the total weights of all edges and the shortest
+ * path from `initial` to `found`
+ *
+ * @param next - Generate the outbound edges and their weights
+ * @param found {Predicate<A>} - A predicate to determine when the node is found
+ * @param initial {A} - The starting value
+ */
 export function dijkstra<A>(
   next: (a: A) => CostState<A>[],
   found: Predicate<A>,
