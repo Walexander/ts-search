@@ -44,7 +44,7 @@ describe('generalizedSearch', () => {
       }
       const eff = generalizedSearch(next, found, identity, Ord.string)
       const [log, exit] = eff.unsafeRunAll(state)
-      expect(log.toArray).to.include('visited A')
+      expect(log.toArray).to.include('visiting A')
       expect(exit.isSuccess()).to.be.true
       exit.isSuccess() && expect(exit.value[1]).to.equal(Maybe.none)
     })

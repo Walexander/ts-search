@@ -3,14 +3,6 @@ import { SearchQueue } from '@ts-search/core/internal/search-container'
 import type { SearchState } from '@ts-search/core/internal/search-state'
 
 export { SearchQueue }
-
-/**
- * The next(a) callback returns the edges of `a`
- * @callback nextNeighbors
- * @param {A}
- * @returns {A[]}
- */
-
 /**
  * `bfs` uses a queue to find the first node that satisfies the given predicate returning a Maybe for the path to the solution node or Maybe.none if none exists
  *
