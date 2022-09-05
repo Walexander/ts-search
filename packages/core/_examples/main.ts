@@ -1,7 +1,7 @@
 import { bfs, dfs } from '@ts-search/core'
 
-const countChange_bfs = (target: number) => bfs(addOne(target), (a) => a == target, 0)
-const countChange_dfs = (target: number) => dfs(addOne(target), (a) => a == target, 0)
+const countChange_bfs = (target: number) => bfs(addOne(target), (a: number) => a == target, 0)
+const countChange_dfs = (target: number) => dfs(addOne(target), (a: number) => a == target, 0)
 console.log('BFS 67 =', countChange_bfs(67).value)
 console.log('DFS 67 =', countChange_dfs(67).value)
 
@@ -17,7 +17,7 @@ const adjacencyList = Object.fromEntries([
 //    \ /
 //     4
 const neighbors = (n: number) => adjacencyList[n] || []
-console.log('path 1->4 : ', dfs(neighbors, (a) => a == 4, 1))
+console.log('path 1->4 : ', dfs(neighbors, (a: number) => a == 4, 1))
 
 // const result2 = countChange(67)
 // console.log('change for 67 =', result2.value)
